@@ -3,20 +3,17 @@ const path = require('path');
 const http = require('http');
 const app = express();
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve CSS files
-app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+// Serve static files from the root directory
+app.use(express.static(__dirname));
 
 // Main route - serve login page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Dashboard route
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
 function startServer(port) {
@@ -27,7 +24,7 @@ function startServer(port) {
 🚀 ELECTROMANAGER SERVER IS ONLINE!
 =====================================
 🌐 URL: http://localhost:${port}
-📁 Serving from: ${__dirname}/public
+📁 Serving from: ${__dirname}
 =====================================
 ✨ Keep this window OPEN while using the site.
         `);

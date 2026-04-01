@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ShreeNath</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+    <div class="background-animate">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="card-flip-container">
+            <div class="card">
+                <!-- Customer Login (Front) -->
+                <div class="card-face card-front">
+                    <div class="content-box" id="auth-content">
+                        <!-- Login Section -->
+                        <div id="login-section">
+                            <h2>Login</h2>
+                            <p class="subtitle">ElectroManager Customer Portal</p>
+                            <form id="customer-form">
+                                <div class="input-box">
+                                    <input type="email" id="cust-email" placeholder=" " required>
+                                    <label>Email Address</label>
+                                    <ion-icon name="mail-outline"></ion-icon>
+                                </div>
+                                <div class="input-box">
+                                    <input type="password" id="cust-password" placeholder=" " required>
+                                    <label>Password</label>
+                                    <ion-icon name="lock-closed-outline"></ion-icon>
+                                </div>
+                                <div class="remember-forgot">
+                                    <label><input type="checkbox"> Remember Me</label>
+                                    <a href="#">Forgot?</a>
+                                </div>
+                                <button type="submit" class="btn">LOG IN</button>
+                                <div class="switch-link">
+                                    <p>Don't have an account? <a href="#" id="to-register">Register</a></p>
+                                    <p>Admin Access? <a href="#" id="to-admin">Click Here</a></p>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Register Section -->
+                        <div id="register-section" style="display: none;">
+                            <h2>Register</h2>
+                            <p class="subtitle">Join ElectroManager</p>
+                            <form id="register-form">
+                                <div class="input-box">
+                                    <input type="text" id="reg-name" placeholder=" " required>
+                                    <label>Full Name</label>
+                                    <ion-icon name="person-outline"></ion-icon>
+                                </div>
+                                <div class="input-box">
+                                    <input type="email" id="reg-email" placeholder=" " required>
+                                    <label>Email Address</label>
+                                    <ion-icon name="mail-outline"></ion-icon>
+                                </div>
+                                <div class="input-box">
+                                    <input type="password" id="reg-password" placeholder=" " required>
+                                    <label>Password</label>
+                                    <ion-icon name="lock-closed-outline"></ion-icon>
+                                </div>
+                                <div class="input-box">
+                                    <input type="password" id="reg-confirm" placeholder=" " required>
+                                    <label>Confirm Password</label>
+                                    <ion-icon name="shield-outline"></ion-icon>
+                                </div>
+                                <div class="input-box" style="margin-bottom: 20px;">
+                                    <select id="reg-role" required
+                                        style="width: 100%; height: 50px; background: transparent; border: none; outline: none; font-size: 1em; color: var(--text-dark); padding: 0 35px 0 5px; border-bottom: 2px solid var(--text-dark); appearance: none; position: relative; z-index: 1;">
+                                        <option value="customer" style="background: rgba(255, 255, 255, 0.9);">Customer
+                                            Account</option>
+                                        <option value="supplier" style="background: rgba(255, 255, 255, 0.9);">Supplier
+                                            Account</option>
+                                    </select>
+                                    <label style="top: -5px; font-size: .85em; color: var(--primary);">Account
+                                        Type</label>
+                                    <ion-icon name="briefcase-outline"></ion-icon>
+                                </div>
+                                <button type="submit" class="btn">CREATE ACCOUNT</button>
+                                <div class="switch-link">
+                                    <p>Already have an account? <a href="#" id="to-login">Login</a></p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Login (Back) -->
+                <div class="card-face card-back">
+                    <div class="content-box">
+                        <h2>Admin</h2>
+                        <p class="subtitle">System Control Center</p>
+                        <form id="admin-form">
+                            <div class="input-box">
+                                <input type="email" id="admin-email" placeholder=" " required>
+                                <label>Admin Email</label>
+                                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                            </div>
+                            <div class="input-box">
+                                <input type="password" id="admin-password" placeholder=" " required>
+                                <label>Access Key</label>
+                                <ion-icon name="key-outline"></ion-icon>
+                            </div>
+                            <div class="remember-forgot">
+                                <label><input type="checkbox"> Keep Active</label>
+                            </div>
+                            <button type="submit" class="btn admin-btn">ADMIN AUTH</button>
+                            <div class="switch-link">
+                                <p>Not Admin? <a href="#" id="to-customer">User Login</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import db from './js/db.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('.card');
+            const toAdminBtn = document.getElementById('to-admin');
+            const toCustomerBtn = document.getElementById('to-customer');
+            const toRegisterBtn = document.getElementById('to-register');
+            const toLoginBtn = document.getElementById('to-login');
+
+            const loginSection = document.getElementById('login-section');
+            const registerSection = document.getElementById('register-section');
+
+            if (toAdminBtn) toAdminBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                card.classList.add('flipped');
+            });
+
+            if (toCustomerBtn) toCustomerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                card.classList.remove('flipped');
+                // Reset to login view when switching back from admin
+                loginSection.style.display = 'block';
+                registerSection.style.display = 'none';
+            });
+
+            if (toRegisterBtn) toRegisterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'block';
+            });
+
+            if (toLoginBtn) toLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                registerSection.style.display = 'none';
+                loginSection.style.display = 'block';
+            });
+
+            const supabaseUrl = 'https://qzolxhegytfryuomjcsw.supabase.co';
+            const supabaseKey = 'sb_publishable_iISvDBItSzarWFbKWC9ngA_4-EhMmGz';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+            async function handleLogin(email, password) {
+                // Check local database first for demo users
+                const profiles = db.profiles.getAll();
+                const user = profiles.find(p => p.username === email || p.email === email);
+
+                // Demo fallback for default admin
+                if (email === 'admin@retail.com' && password === 'Admin123!') {
+                    const demoUser = { id: 'admin-id', email: email, role: 'admin', full_name: 'System Admin' };
+                    localStorage.setItem('electro_session', JSON.stringify(demoUser));
+                    return window.location.href = "dashboard.html";
+                }
+
+                // If user exists in local DB, "login" them
+                if (user) {
+                    localStorage.setItem('electro_session', JSON.stringify(user));
+                    return window.location.href = "dashboard.html";
+                }
+
+                // Supabase Fallback
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) return alert("❌ Login Failed: " + error.message);
+
+                // Success
+                localStorage.setItem('electro_session', JSON.stringify(data.user));
+                window.location.href = "dashboard.html";
+            }
+
+            async function handleRegister(name, email, password, role) {
+                // Save to local database for demo
+                const newProfile = {
+                    id: 'user-' + Date.now(),
+                    full_name: name,
+                    username: email,
+                    role: role,
+                    created_at: new Date().toISOString()
+                };
+                db.profiles.save(newProfile);
+
+                // Supabase Attempt (Optional for demo)
+                try {
+                    await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            data: { full_name: name }
+                        }
+                    });
+                } catch (e) {
+                    console.warn("Supabase signup failed/skipped:", e);
+                }
+
+                alert("✅ Registration Successful! You can now login with your credentials.");
+                registerSection.style.display = 'none';
+                loginSection.style.display = 'block';
+            }
+
+            document.getElementById('customer-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleLogin(document.getElementById('cust-email').value, document.getElementById('cust-password').value);
+            });
+
+            document.getElementById('admin-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleLogin(document.getElementById('admin-email').value, document.getElementById('admin-password').value);
+            });
+
+            document.getElementById('register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('reg-name').value;
+                const email = document.getElementById('reg-email').value;
+                const password = document.getElementById('reg-password').value;
+                const confirm = document.getElementById('reg-confirm').value;
+                const role = document.getElementById('reg-role').value;
+
+                if (password !== confirm) return alert("❌ Passwords do not match!");
+                handleRegister(name, email, password, role);
+            });
+        });
+    </script>
+</body>
+
+</html>

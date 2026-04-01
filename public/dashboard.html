@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ShreeNath</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script type="module">
+        import db from './js/db.js';
+        window.db = db;
+    </script>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo"><ion-icon name="flash-outline"></ion-icon> ShreeNath</div>
+        <nav>
+            <ul id="nav-links">
+                <!-- Nav items injected by JS -->
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="page-info">
+                <h2 id="page-title">Executive Overview</h2>
+                <p id="role-text">Syncing data with cloud core...</p>
+            </div>
+            <div class="user-ctrl">
+                <span id="user-display-name">...</span>
+                <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            </div>
+        </header>
+
+        <!-- Admin View -->
+        <div id="admin-overview" class="section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Products In Stock</h3>
+                    <div class="value" id="stat-products">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Verified Users</h3>
+                    <div class="value" id="stat-users">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Net Revenue</h3>
+                    <div class="value" id="stat-revenue">₹0</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px; margin-top: 28px;">
+                <div class="chart-container" style="margin-bottom: 0;">
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="content-column">
+                    <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--text-dark);">Inventory Snapshot</h3>
+                    <div id="visual-highlights" style="display: grid; gap: 15px;">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory (Products) -->
+        <div id="admin-inventory" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>Global Inventory</h3>
+                <button class="add-btn" onclick="openProductModal()">+ New Product</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Suppliers -->
+        <div id="admin-suppliers" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>Supplier Directory</h3>
+                <button class="add-btn" onclick="openSupplierModal()">+ New Supplier</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Categories</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="suppliers-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Customers -->
+        <div id="admin-customers" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h3>User Management</h3>
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 5px;">Manage system access and roles</p>
+                </div>
+                <button class="add-btn" onclick="openUserModal()">+ New User</button>
+            </div>
+            <table class="data-table" style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Identifier</th>
+                        <th>Joined</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customers-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Admin Orders -->
+        <div id="admin-orders-view" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>Platform Orders</h3>
+                <p style="color: #94a3b8; font-size: 0.8rem;">Master view of all transactions</p>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-orders-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Customer View -->
+        <div id="customer-shop" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>Real-Life Customer Needs</h3>
+                <p style="color: #94a3b8; font-size: 0.8rem;">Browse products and access safe payment modes</p>
+            </div>
+            <div class="stats-grid" id="product-gallery"></div>
+        </div>
+
+        <div id="customer-orders-view" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>My Purchase History</h3>
+                <p style="color: #94a3b8; font-size: 0.8rem;">Track your secure transactions</p>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-orders-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Supplier View -->
+        <div id="supplier-inventory" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>My Brand Products</h3>
+                <button class="add-btn" onclick="openSupplierProductModal()">+ Give Product</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="supplier-inventory-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Supplier Profile -->
+        <div id="supplier-profile-view" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3>My Supplier Details</h3>
+                <p style="color: #94a3b8; font-size: 0.8rem;">Only Admin and you can view/edit these details</p>
+            </div>
+            <div class="stat-card" style="max-width: 600px;">
+                <form id="mySupplierForm">
+                    <div class="input-box" style="margin-bottom: 20px;">
+                        <input type="text" id="my-s-company" placeholder="Company Name"
+                            style="width:100%; padding:10px; margin-top:5px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white;"
+                            required>
+                    </div>
+                    <div class="input-box" style="margin-bottom: 20px;">
+                        <input type="text" id="my-s-contact" placeholder="Contact Person"
+                            style="width:100%; padding:10px; margin-top:5px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white;">
+                    </div>
+                    <div class="input-box" style="margin-bottom: 20px;">
+                        <input type="email" id="my-s-email" placeholder="Email Address"
+                            style="width:100%; padding:10px; margin-top:5px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white;">
+                    </div>
+                    <div class="input-box" style="margin-bottom: 20px;">
+                        <input type="tel" id="my-s-phone" placeholder="Phone Number"
+                            style="width:100%; padding:10px; margin-top:5px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white;">
+                    </div>
+                    <div class="input-box" style="margin-bottom: 20px;">
+                        <input type="text" id="my-s-categories" placeholder="Categories (e.g., Laptops)"
+                            style="width:100%; padding:10px; margin-top:5px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white;">
+                    </div>
+                    <button type="submit" class="btn"
+                        style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">SAVE
+                        MY DETAILS</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h3 id="product-modal-title">📦 Product Interface</h3>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 20px;">Update product catalog details.</p>
+            <form id="productForm">
+                <input type="hidden" id="p-id">
+                <input type="text" id="p-name" placeholder="Product Title" required>
+                <input type="url" id="p-image" placeholder="Photo URL (e.g. Unsplash link)">
+                <div class="form-grid">
+                    <input type="number" id="p-price" step="1" placeholder="Price (₹)" required>
+                    <input type="number" id="p-stock" placeholder="Stock Units" required>
+                </div>
+                <textarea id="p-desc" rows="3" placeholder="Description & Specs"></textarea>
+                <button type="submit" class="btn"
+                    style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">SAVE
+                    TO DATABASE</button>
+                <button type="button" class="logout-btn" style="width: 100%; margin-top: 10px;"
+                    onclick="closeModal('productModal')">CANCEL</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supplier Modal -->
+    <div id="supplierModal" class="modal">
+        <div class="modal-content">
+            <h3 id="supplier-modal-title">🚚 Supplier Profile</h3>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 20px;">Manage vendor relationships.</p>
+            <form id="supplierForm">
+                <input type="hidden" id="s-id">
+                <input type="text" id="s-company" placeholder="Company Name" required>
+                <input type="text" id="s-contact" placeholder="Contact Person">
+                <div class="form-grid">
+                    <input type="email" id="s-email" placeholder="Email Address">
+                    <input type="tel" id="s-phone" placeholder="Phone Number">
+                </div>
+                <input type="text" id="s-categories" placeholder="Categories (e.g., Laptops, Phones)">
+                <button type="submit" class="btn"
+                    style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">SAVE
+                    CHANGES</button>
+                <button type="button" class="logout-btn" style="width: 100%; margin-top: 10px;"
+                    onclick="closeModal('supplierModal')">CANCEL</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h3 id="user-modal-title">👤 Edit User</h3>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 20px;">Modify user privileges and info.</p>
+            <form id="userForm">
+                <input type="hidden" id="u-id">
+                <input type="text" id="u-name" placeholder="Full Name" required>
+                <input type="text" id="u-username" placeholder="Username/Email" readonly>
+                <select id="u-role">
+                    <option value="customer">Customer</option>
+                    <option value="supplier">Supplier</option>
+                    <option value="admin">Administrator</option>
+                </select>
+                <button type="submit" id="user-submit-btn" class="btn"
+                    style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">SAVE
+                    USER DETAILS</button>
+                <button type="button" class="logout-btn" style="width: 100%; margin-top: 10px;"
+                    onclick="closeModal('userModal')">CANCEL</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3>💳 Payment Mode</h3>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 20px;">Select your preferred payment option.</p>
+            <form id="paymentForm">
+                <h4 id="pay-amount-display" style="color: var(--primary); margin-bottom: 15px; font-size: 1.2rem;"></h4>
+                <select id="payment-method" required
+                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; margin-bottom: 15px;">
+                    <option value="credit_card">Credit / Debit Card</option>
+                    <option value="upi">UPI / Scanner</option>
+                    <option value="net_banking">Net Banking</option>
+                    <option value="cod">Cash on Delivery</option>
+                </select>
+                <button type="submit" class="btn"
+                    style="width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">CONFIRM
+                    SECURE PAYMENT</button>
+                <button type="button" class="logout-btn" style="width: 100%; margin-top: 10px;"
+                    onclick="closeModal('paymentModal')">CANCEL</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import db from './js/db.js';
+        const supabaseUrl = 'https://qzolxhegytfryuomjcsw.supabase.co';
+        const supabaseKey = 'sb_publishable_iISvDBItSzarWFbKWC9ngA_4-EhMmGz';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUser, currentProfile, salesChart;
+
+        async function init() {
+            console.log("Initializing Dashboard (Local Mode)...");
+            try {
+                // Simulate session with localStorage for Local Mode
+                let sessionUser = JSON.parse(localStorage.getItem('electro_session'));
+
+                // Fallback to Supabase if session doesn't exist locally
+                if (!sessionUser) {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        sessionUser = session.user;
+                        // Map Supabase user to local profile
+                        const localProfiles = db.profiles.getAll();
+                        let profile = localProfiles.find(p => p.id === sessionUser.id);
+                        if (!profile) {
+                            profile = { id: sessionUser.id, full_name: sessionUser.email.split('@')[0], username: sessionUser.email, role: 'admin' };
+                            db.profiles.save(profile);
+                        }
+                        localStorage.setItem('electro_session', JSON.stringify(sessionUser));
+                    }
+                }
+
+                if (!sessionUser) {
+                    console.warn("No active session found, redirecting...");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = sessionUser;
+                const profiles = db.profiles.getAll();
+                currentProfile = profiles.find(p => p.id === currentUser.id) || profiles[0];
+
+                // Update UI with user info
+                const displayName = currentProfile?.full_name || currentUser.email;
+                const role = currentProfile?.role || 'customer';
+
+                document.getElementById('user-display-name').innerText = displayName;
+                document.getElementById('role-text').innerText = `${role.toUpperCase()} ACCESS GRANTED`;
+
+                renderNav(role);
+
+                if (role === 'admin') {
+                    showSection('admin-overview');
+                    loadStats();
+                    initChart();
+                    loadVisualHighlights();
+                } else if (role === 'supplier') {
+                    showSection('supplier-inventory');
+                    loadSupplierInventory();
+                } else {
+                    showSection('customer-shop');
+                    loadShop();
+                }
+
+                console.log("Dashboard initialization complete.");
+            } catch (err) {
+                console.error("Critical Initialization Error:", err);
+            }
+        }
+
+        function renderNav(role) {
+            const nav = document.getElementById('nav-links');
+            if (role === 'admin') {
+                nav.innerHTML = `
+                    <li><a href="#" class="active" id="nav-overview"><ion-icon name="grid-outline"></ion-icon> <span>Overview</span></a></li>
+                    <li><a href="#" id="nav-inventory"><ion-icon name="layers-outline"></ion-icon> <span>Inventory</span></a></li>
+                    <li><a href="#" id="nav-suppliers"><ion-icon name="bus-outline"></ion-icon> <span>Suppliers</span></a></li>
+                    <li><a href="#" id="nav-customers"><ion-icon name="people-outline"></ion-icon> <span>Customers</span></a></li>
+                    <li><a href="#" id="nav-orders"><ion-icon name="cart-outline"></ion-icon> <span>Orders</span></a></li>
+                `;
+                // Add event listeners for admin nav
+                document.getElementById('nav-overview').onclick = (e) => { e.preventDefault(); switchTab('admin-overview', e.currentTarget); };
+                document.getElementById('nav-inventory').onclick = (e) => { e.preventDefault(); switchTab('admin-inventory', e.currentTarget); };
+                document.getElementById('nav-suppliers').onclick = (e) => { e.preventDefault(); switchTab('admin-suppliers', e.currentTarget); };
+                document.getElementById('nav-customers').onclick = (e) => { e.preventDefault(); switchTab('admin-customers', e.currentTarget); };
+                document.getElementById('nav-orders').onclick = (e) => { e.preventDefault(); switchTab('admin-orders-view', e.currentTarget); };
+            } else if (role === 'supplier') {
+                nav.innerHTML = `
+                    <li><a href="#" class="active" id="nav-supplier-inv"><ion-icon name="cube-outline"></ion-icon> <span>My Brands</span></a></li>
+                    <li><a href="#" id="nav-supplier-profile"><ion-icon name="person-outline"></ion-icon> <span>My Details</span></a></li>
+                `;
+                document.getElementById('nav-supplier-inv').onclick = (e) => { e.preventDefault(); switchTab('supplier-inventory', e.currentTarget); };
+                document.getElementById('nav-supplier-profile').onclick = (e) => { e.preventDefault(); switchTab('supplier-profile-view', e.currentTarget); };
+            } else {
+                nav.innerHTML = `
+                    <li><a href="#" class="active" id="nav-customer-shop"><ion-icon name="basket-outline"></ion-icon> <span>Market</span></a></li>
+                    <li><a href="#" id="nav-customer-orders"><ion-icon name="receipt-outline"></ion-icon> <span>My Orders</span></a></li>
+                `;
+                document.getElementById('nav-customer-shop').onclick = (e) => { e.preventDefault(); switchTab('customer-shop', e.currentTarget); };
+                document.getElementById('nav-customer-orders').onclick = (e) => { e.preventDefault(); switchTab('customer-orders-view', e.currentTarget); };
+            }
+        }
+
+        function switchTab(id, el) {
+            showSection(id);
+            document.querySelectorAll('#nav-links a').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+            if (id === 'admin-inventory') loadInventory();
+            if (id === 'admin-suppliers') loadSuppliers();
+            if (id === 'admin-customers') loadCustomers();
+            if (id === 'admin-orders-view') loadAdminOrders();
+            if (id === 'customer-orders-view') loadCustomerOrders();
+            if (id === 'supplier-profile-view') loadSupplierProfile();
+            if (id === 'admin-overview') { loadStats(); loadVisualHighlights(); }
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // Update page title
+            const titleMap = {
+                'admin-overview': 'Executive Overview',
+                'admin-inventory': 'Global Inventory',
+                'admin-suppliers': 'Supplier Directory',
+                'admin-customers': 'User Management',
+                'admin-orders-view': 'Platform Orders',
+                'supplier-inventory': 'Supplier Brands & Products',
+                'supplier-profile-view': 'My Supplier Details',
+                'customer-shop': 'ShreeNath Market',
+                'customer-orders-view': 'My Purchase History'
+            };
+            document.getElementById('page-title').innerText = titleMap[id] || 'Dashboard';
+        }
+
+        function loadStats() {
+            const products = db.products.getAll();
+            const profiles = db.profiles.getAll();
+            const orders = db.orders.getAll();
+
+            document.getElementById('stat-products').innerText = products.length;
+            document.getElementById('stat-users').innerText = profiles.length;
+            const total = orders.reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
+            document.getElementById('stat-revenue').innerText = '₹' + total.toLocaleString('en-IN');
+        }
+
+        function loadVisualHighlights() {
+            const products = db.products.getAll();
+            const container = document.getElementById('visual-highlights');
+            if (!container) return;
+
+            if (products.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1; padding: 40px;">No inventory items to display.</p>';
+                return;
+            }
+
+            // Show top 4 products
+            const highlights = products.slice(0, 4);
+            container.innerHTML = highlights.map(p => `
+                <div class="stat-card" style="display: flex; align-items: center; gap: 15px; padding: 15px;">
+                    <img src="${p.image_url || 'https://via.placeholder.com/60'}" class="product-img-cell" style="width: 60px; height: 60px;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 14px;">${p.name}</h4>
+                        <p style="margin: 5px 0 0; color: #6366f1; font-weight: 700;">₹${p.price.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 12px; color: #94a3b8;">Stock</span>
+                        <div style="font-weight: 600; font-size: 14px; color: ${p.stock_quantity < 10 ? 'var(--danger)' : 'var(--success)'}">${p.stock_quantity}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const orders = db.orders.getAll();
+            const labels = orders.length > 0 ? orders.map(o => new Date(o.created_at).toLocaleDateString()) : ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+            const values = orders.length > 0 ? orders.map(o => o.total_amount) : [50000, 80000, 45000, 95000, 120000];
+
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if (salesChart) salesChart.destroy();
+
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Gross Volume (₹)',
+                        data: values,
+                        borderColor: '#6366f1',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { color: '#64748b', font: { family: 'Inter', weight: '500' } },
+                            border: { display: false }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { family: 'Inter', weight: '500' } },
+                            border: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleFont: { family: 'Inter', size: 13 },
+                            bodyFont: { family: 'Inter', size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+        }
+
+        /* --- Inventory Logic --- */
+        window.loadInventory = function () {
+            const body = document.getElementById('inventory-body');
+            const products = db.products.getAll();
+
+            if (products.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #94a3b8;">No products found in the catalog.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = products.map(p => `
+                <tr>
+                    <td><img src="${p.image_url || 'https://via.placeholder.com/40'}" class="product-img-cell"></td>
+                    <td style="font-weight: 600;">${p.name}</td>
+                    <td style="color: #6366f1; font-weight: 700;">₹${p.price.toLocaleString('en-IN')}</td>
+                    <td>
+                        <span class="badge" style="background: ${p.stock_quantity < 10 ? '#fee2e2' : '#dcfce7'}; color: ${p.stock_quantity < 10 ? '#ef4444' : '#10b981'};">
+                            ${p.stock_quantity} units
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="icon-btn edit" onclick="editProduct('${p.id}')"><ion-icon name="create-outline"></ion-icon></button>
+                            <button class="icon-btn delete" onclick="deleteProduct('${p.id}')"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.openProductModal = function (prod = null) {
+            const modal = document.getElementById('productModal');
+            document.getElementById('product-modal-title').innerText = prod ? "📦 Edit Product" : "📦 Add Product";
+            document.getElementById('p-id').value = prod ? prod.id : "";
+            document.getElementById('p-name').value = prod ? prod.name : "";
+            document.getElementById('p-image').value = prod ? (prod.image_url || "") : "";
+            document.getElementById('p-price').value = prod ? prod.price : "";
+            document.getElementById('p-stock').value = prod ? prod.stock_quantity : "";
+            document.getElementById('p-desc').value = prod ? (prod.description || "") : "";
+            modal.style.display = 'flex';
+        }
+
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const product = {
+                id: document.getElementById('p-id').value,
+                name: document.getElementById('p-name').value,
+                image_url: document.getElementById('p-image').value,
+                price: parseFloat(document.getElementById('p-price').value),
+                stock_quantity: parseInt(document.getElementById('p-stock').value),
+                description: document.getElementById('p-desc').value,
+                supplier_id: currentProfile?.role === 'supplier' ? currentUser.id : (document.getElementById('p-id').value ? db.products.getById(document.getElementById('p-id').value).supplier_id : 'admin')
+            };
+
+            db.products.save(product);
+            closeModal('productModal');
+            if (currentProfile?.role === 'supplier') {
+                loadSupplierInventory();
+            } else {
+                loadInventory();
+                loadStats();
+                loadVisualHighlights();
+            }
+        });
+
+        window.editProduct = function (id) {
+            const prod = db.products.getById(id);
+            if (prod) openProductModal(prod);
+        }
+
+        window.deleteProduct = function (id) {
+            if (confirm("Are you sure you want to remove this product?")) {
+                db.products.delete(id);
+                if (currentProfile?.role === 'supplier') {
+                    loadSupplierInventory();
+                } else {
+                    loadInventory();
+                    loadStats();
+                    loadVisualHighlights();
+                }
+            }
+        }
+
+        /* --- Supplier Brands & Products Logic --- */
+        window.loadSupplierInventory = function () {
+            const body = document.getElementById('supplier-inventory-body');
+            const products = db.products.getAll().filter(p => String(p.supplier_id) === String(currentUser.id));
+
+            if (products.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #94a3b8;">You haven\'t added any brand products yet.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = products.map(p => `
+                <tr>
+                    <td><img src="${p.image_url || 'https://via.placeholder.com/40'}" class="product-img-cell"></td>
+                    <td style="font-weight: 600;">${p.name}</td>
+                    <td style="color: #6366f1; font-weight: 700;">₹${p.price.toLocaleString('en-IN')}</td>
+                    <td>
+                        <span class="badge" style="background: ${p.stock_quantity < 10 ? '#fee2e2' : '#dcfce7'}; color: ${p.stock_quantity < 10 ? '#ef4444' : '#10b981'};">
+                            ${p.stock_quantity} units
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="icon-btn edit" onclick="editProduct('${p.id}')"><ion-icon name="create-outline"></ion-icon></button>
+                            <button class="icon-btn delete" onclick="deleteProduct('${p.id}')"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.openSupplierProductModal = function (prod = null) {
+            openProductModal(prod);
+        }
+
+        /* --- Suppliers Logic --- */
+        window.loadSuppliers = function () {
+            const body = document.getElementById('suppliers-body');
+            const sups = db.suppliers.getAll();
+
+            if (sups.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #94a3b8;">No suppliers registered.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = sups.map(s => `
+                <tr>
+                    <td style="font-weight: 600;">${s.name}</td>
+                    <td>${s.contact_name || 'N/A'}</td>
+                    <td>${s.email || 'N/A'}</td>
+                    <td><span class="badge" style="background: #f1f5f9; color: #475569;">${s.categories || 'General'}</span></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="icon-btn edit" onclick="editSupplier('${s.id}')"><ion-icon name="create-outline"></ion-icon></button>
+                            <button class="icon-btn delete" onclick="deleteSupplier('${s.id}')"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.openSupplierModal = function (sup = null) {
+            const modal = document.getElementById('supplierModal');
+            document.getElementById('supplier-modal-title').innerText = sup ? "🚚 Edit Supplier" : "🚚 Add Supplier";
+            document.getElementById('s-id').value = sup ? sup.id : "";
+            document.getElementById('s-company').value = sup ? sup.name : "";
+            document.getElementById('s-contact').value = sup ? (sup.contact_name || "") : "";
+            document.getElementById('s-email').value = sup ? (sup.email || "") : "";
+            document.getElementById('s-phone').value = sup ? (sup.phone || "") : "";
+            document.getElementById('s-categories').value = sup ? (sup.categories || "") : "";
+            modal.style.display = 'flex';
+        }
+
+        document.getElementById('supplierForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const supplier = {
+                id: document.getElementById('s-id').value,
+                name: document.getElementById('s-company').value,
+                contact_name: document.getElementById('s-contact').value,
+                email: document.getElementById('s-email').value,
+                phone: document.getElementById('s-phone').value,
+                categories: document.getElementById('s-categories').value
+            };
+
+            db.suppliers.save(supplier);
+            closeModal('supplierModal');
+            loadSuppliers();
+        });
+
+        window.editSupplier = function (id) {
+            const sup = db.suppliers.getById(id);
+            if (sup) openSupplierModal(sup);
+        }
+
+        window.deleteSupplier = function (id) {
+            if (confirm("Are you sure you want to remove this supplier?")) {
+                db.suppliers.delete(id);
+                loadSuppliers();
+            }
+        }
+
+        /* --- Customers / User Management Logic --- */
+        window.loadCustomers = function () {
+            const body = document.getElementById('customers-body');
+            const users = db.profiles.getAll();
+
+            if (users.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #94a3b8;">No users found.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = users.map(u => `
+                <tr>
+                    <td style="font-weight: 600;">${u.full_name || 'N/A'}</td>
+                    <td style="color: #64748b;">${u.username || u.id}</td>
+                    <td>${new Date(u.created_at || Date.now()).toLocaleDateString()}</td>
+                    <td><span class="badge badge-${u.role}">${u.role}</span></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="icon-btn edit" onclick="editUser('${u.id}')"><ion-icon name="create-outline"></ion-icon></button>
+                            <button class="icon-btn delete" onclick="deleteUser('${u.id}')"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.openUserModal = function (user = null) {
+            document.getElementById('u-id').value = user ? user.id : "";
+            document.getElementById('u-name').value = user ? user.full_name : "";
+            document.getElementById('u-username').value = user ? user.username : "";
+            document.getElementById('u-username').readOnly = user ? true : false;
+            if (!user) {
+                document.getElementById('u-username').placeholder = "Username/Email (Required for new users)";
+            }
+            document.getElementById('u-role').value = user ? user.role : "customer";
+            document.getElementById('user-modal-title').innerText = user ? "👤 Edit User" : "👤 Add User";
+            document.getElementById('user-submit-btn').innerText = user ? "SAVE USER DETAILS" : "ADD NEW USER";
+            openModal('userModal');
+        }
+
+        window.editUser = function (id) {
+            const user = db.profiles.getById(id);
+            if (user) {
+                openUserModal(user);
+            }
+        }
+
+        document.getElementById('userForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const idInput = document.getElementById('u-id').value;
+            const usernameInput = document.getElementById('u-username').value;
+
+            const user = {
+                id: idInput || `user-id-${Date.now()}`,
+                full_name: document.getElementById('u-name').value,
+                username: usernameInput || `user-${Date.now()}@user.com`,
+                role: document.getElementById('u-role').value
+            };
+
+            db.profiles.save(user);
+            closeModal('userModal');
+            loadCustomers();
+            loadStats();
+        });
+
+        window.deleteUser = function (id) {
+            if (id === currentUser.id) return alert("You cannot delete yourself!");
+            if (confirm("Are you sure you want to remove this user?")) {
+                db.profiles.delete(id);
+                loadCustomers();
+                loadStats();
+            }
+        }
+
+        window.loadShop = function () {
+            const products = db.products.getAll();
+            const gallery = document.getElementById('product-gallery');
+            gallery.innerHTML = products.length > 0 ? products.map(p => `
+                <div class="stat-card" style="text-align: center; padding: 20px;">
+                    <div style="width: 100%; height: 180px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 12px; padding: 10px;">
+                        <img src="${p.image_url || 'https://via.placeholder.com/150'}" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px;">
+                    </div>
+                    <h4 style="margin-bottom: 10px; font-size: 18px;">${p.name}</h4>
+                    <p style="color:#64748b; font-size:13px; margin: 10px 0; height: 40px; overflow: hidden; line-height: 1.4;">${p.description || 'Premium selection from ShreeNath.'}</p>
+                    <div style="font-size:1.6rem; font-weight:800; color:#6366f1; margin: 15px 0;">₹${p.price.toLocaleString('en-IN')}</div>
+                    <button class="add-btn" style="width:100%; font-size: 14px; letter-spacing: 0.5px;" onclick="showPaymentModal(${p.price}, '${p.name.replace(/'/g, "\\'")}')">PURCHASE SECURELY</button>
+                </div>`).join('') : '<p style="text-align:center; width:100%; color:#94a3b8; padding: 100px 0;">No products are currently available in the market.</p>';
+        }
+
+        let currentPaymentAmount = 0;
+        let currentPaymentProduct = "Purchased Item";
+        window.showPaymentModal = function (amount, productName = "Purchased Item") {
+            currentPaymentAmount = amount;
+            currentPaymentProduct = productName;
+            document.getElementById('pay-amount-display').innerText = 'Total Amount: ₹' + amount.toLocaleString('en-IN');
+            openModal('paymentModal');
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const method = document.getElementById('payment-method').options[document.getElementById('payment-method').selectedIndex].text;
+            db.orders.save({
+                total_amount: currentPaymentAmount,
+                method: method,
+                customer_id: currentUser.id,
+                customer_name: currentProfile.full_name,
+                product_name: currentPaymentProduct
+            });
+            alert("Order placed successfully via " + method + "! Real-life transaction recorded securely.");
+            closeModal('paymentModal');
+            loadStats();
+            loadCustomerOrders(); // reload to show new order
+        });
+
+        window.loadAdminOrders = function () {
+            const body = document.getElementById('admin-orders-body');
+            const orders = db.orders.getAll().reverse();
+            if (orders.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color: #94a3b8;">No orders on the platform yet.</td></tr>';
+                return;
+            }
+            body.innerHTML = orders.map(o => `
+                <tr>
+                    <td style="font-family: monospace; color: #94a3b8;">#ORD-${String(o.id).slice(-6)}</td>
+                    <td style="font-weight: 600;">${o.customer_name || 'Guest'}</td>
+                    <td style="color: #10b981; font-weight: 700;">₹${parseFloat(o.total_amount).toLocaleString('en-IN')}</td>
+                    <td><span class="badge" style="background: #1e293b; color: white;">${o.method || 'Card'}</span></td>
+                    <td>${new Date(o.created_at).toLocaleString()}</td>
+                    <td>
+                        <button class="add-btn" style="padding: 6px 12px; font-size: 12px;" onclick="printBill('${o.id}')"><ion-icon name="print-outline" style="vertical-align: middle;"></ion-icon> Print</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.loadCustomerOrders = function () {
+            const body = document.getElementById('customer-orders-body');
+            const orders = db.orders.getAll().filter(o => String(o.customer_id) === String(currentUser.id)).reverse();
+            if (orders.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #94a3b8;">You haven\'t made any purchases yet.</td></tr>';
+                return;
+            }
+            body.innerHTML = orders.map(o => `
+                <tr>
+                    <td style="font-family: monospace; color: #6366f1;">#ORD-${String(o.id).slice(-6)}</td>
+                    <td style="font-weight: 700;">₹${parseFloat(o.total_amount).toLocaleString('en-IN')}</td>
+                    <td><span class="badge" style="background: #e2e8f0; color: #475569;">${o.method || 'Card'}</span></td>
+                    <td>${new Date(o.created_at).toLocaleString()}</td>
+                    <td>
+                        <button class="add-btn" style="padding: 6px 12px; font-size: 12px;" onclick="printBill('${o.id}')"><ion-icon name="print-outline" style="vertical-align: middle;"></ion-icon> Print</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        window.loadSupplierProfile = function () {
+            const sup = db.suppliers.getById(currentUser.id);
+            if (sup) {
+                document.getElementById('my-s-company').value = sup.name || '';
+                document.getElementById('my-s-contact').value = sup.contact_name || '';
+                document.getElementById('my-s-email').value = sup.email || '';
+                document.getElementById('my-s-phone').value = sup.phone || '';
+                document.getElementById('my-s-categories').value = sup.categories || '';
+            }
+        }
+
+        document.getElementById('mySupplierForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const supplier = {
+                id: currentUser.id,
+                name: document.getElementById('my-s-company').value,
+                contact_name: document.getElementById('my-s-contact').value,
+                email: document.getElementById('my-s-email').value,
+                phone: document.getElementById('my-s-phone').value,
+                categories: document.getElementById('my-s-categories').value
+            };
+            db.suppliers.save(supplier);
+            alert("✅ Supplier details updated successfully!");
+        });
+
+        window.openModal = function (id) { document.getElementById(id).style.display = 'flex'; }
+        window.closeModal = function (id) { document.getElementById(id).style.display = 'none'; }
+
+        window.logout = async function () {
+            localStorage.removeItem('electro_session');
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.printBill = function(orderId) {
+            const order = db.orders.getAll().find(o => String(o.id) === String(orderId));
+            if (!order) return;
+            const orderDate = new Date(order.created_at).toLocaleString();
+            const productName = order.product_name || 'Premium Item(s)';
+            
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Invoice #${String(order.id).slice(-6)}</title>
+                    <style>
+                        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #1e293b; padding: 40px; }
+                        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; }
+                        .logo { font-size: 24px; font-weight: bold; color: #6366f1; }
+                        .invoice-title { font-size: 32px; font-weight: bold; color: #334155; }
+                        .billing-info { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                        .table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+                        .table th, .table td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+                        .table th { background-color: #f8fafc; font-weight: 600; color: #475569; }
+                        .total-row td { font-size: 18px; font-weight: bold; }
+                        .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="logo">⚡ ShreeNath</div>
+                        <div class="invoice-title">INVOICE</div>
+                    </div>
+                    
+                    <div class="billing-info">
+                        <div>
+                            <h3 style="margin-top:0; color: #475569; font-size:14px; text-transform:uppercase;">Billed To</h3>
+                            <p style="margin:5px 0; font-weight:600; font-size:18px;">${order.customer_name || 'Guest'}</p>
+                            <p style="margin:5px 0; color:#64748b; font-size: 14px;">Customer ID: ${order.customer_id}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p style="margin:5px 0;"><span style="color:#64748b; font-weight:600;">Invoice No:</span> #ORD-${String(order.id).slice(-6)}</p>
+                            <p style="margin:5px 0;"><span style="color:#64748b; font-weight:600;">Date:</span> ${orderDate}</p>
+                            <p style="margin:5px 0;"><span style="color:#64748b; font-weight:600;">Payment Mode:</span> ${order.method}</p>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th style="text-align:right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${productName}</td>
+                                <td style="text-align:right;">Rs. ${parseFloat(order.total_amount).toLocaleString('en-IN')}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td style="text-align:right;">Total Paid</td>
+                                <td style="text-align:right; color:#6366f1;">Rs. ${parseFloat(order.total_amount).toLocaleString('en-IN')}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        <p>Thank you for shopping with ShreeNath.</p>
+                        <p>For support, please contact support@shreenath.com</p>
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() { 
+                                window.print();
+                                setTimeout(function() { window.close(); }, 500);
+                            }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

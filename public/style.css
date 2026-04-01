@@ -1,0 +1,404 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Animated Background --- */
+.background-animate {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 20s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: #764ba2;
+    top: -50px;
+    left: -50px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 300px;
+    height: 300px;
+    background: #667eea;
+    bottom: -50px;
+    right: -50px;
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 200px;
+    height: 200px;
+    background: #ff758c;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -10s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+/* --- Card Container --- */
+.container {
+    position: relative;
+    z-index: 10;
+    perspective: 1000px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.85);
+    /* Slightly more opaque for readability */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+        0 20px 40px -10px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+}
+
+.card-flip-container {
+    width: 400px;
+    height: 620px;
+}
+
+/* --- Content Layout --- */
+.content-box {
+    padding: 0 36px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#login-section,
+#register-section {
+    width: 100%;
+    animation: sectionFadeIn 0.4s ease-out;
+}
+
+@keyframes sectionFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-box h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6366f1;
+    /* Primary color for brand pop */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+form {
+    width: 100%;
+}
+
+/* --- Input Fields --- */
+.input-box {
+    position: relative;
+    margin-bottom: 24px;
+    width: 100%;
+    text-align: left;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 16px 48px 16px 16px;
+    /* Right padding for icon */
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #334155;
+    outline: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.input-box input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.input-box input:hover:not(:focus) {
+    border-color: #cbd5e1;
+}
+
+/* Label styling - Static top label for cleaner look or floating?
+   Going for Floating Label as per previous logic but refined. */
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    background: transparent;
+    padding: 0 4px;
+    font-weight: 500;
+}
+
+/* Lift label on focus/valid */
+.input-box input:focus+label,
+.input-box input:not(:placeholder-shown)+label {
+    top: 0;
+    left: 12px;
+    font-size: 11px;
+    color: #6366f1;
+    background: #ffffff;
+    padding: 0 6px;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+/* Icon Styling */
+.input-box ion-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #94a3b8;
+    /* Neutral gray */
+    transition: color 0.25s ease;
+    pointer-events: none;
+}
+
+.input-box input:focus~ion-icon {
+    color: #6366f1;
+}
+
+/* --- Controls --- */
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    font-size: 13px;
+    width: 100%;
+}
+
+.remember-forgot label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 500;
+    user-select: none;
+}
+
+.remember-forgot input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #6366f1;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+}
+
+.remember-forgot a {
+    color: #64748b;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.remember-forgot a:hover {
+    color: #6366f1;
+    text-decoration: underline;
+}
+
+/* --- Buttons --- */
+.btn {
+    width: 100%;
+    padding: 16px;
+    /* Clean gradient as requested */
+    background: linear-gradient(135deg, #f16363 0%, #8b5cf6 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.4);
+    filter: brightness(1.05);
+    /* Slight brighten on hover */
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.admin-btn {
+    /* Different gradient for Admin to distinguish */
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.admin-btn:hover {
+    box-shadow: 0 12px 20px -5px rgba(59, 130, 246, 0.4);
+}
+
+/* --- Footer Links --- */
+.switch-link {
+    margin-top: 32px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.switch-link p {
+    margin: 0;
+}
+
+.switch-link a {
+    color: #6366f1;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: all 0.2s;
+}
+
+.switch-link a:hover {
+    color: #4f46e5;
+    text-decoration: underline;
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .container {
+        padding: 16px;
+    }
+
+    .card-flip-container {
+        width: 100%;
+        max-width: 100%;
+        height: 600px;
+        /* Slightly taller on mobile for keyboard space */
+    }
+
+    .content-box {
+        padding: 40px 24px;
+    }
+
+    .content-box h2 {
+        font-size: 28px;
+    }
+
+    .subtitle {
+        font-size: 10px;
+        letter-spacing: 1px;
+        margin-bottom: 32px;
+    }
+
+    .input-box {
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 14px;
+    }
+}

@@ -452,6 +452,13 @@ header {
     gap: 12px;
 }
 
+.chart-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 28px;
+    margin-top: 28px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .sidebar {
@@ -493,6 +500,16 @@ header {
 
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
     header {

@@ -170,8 +170,9 @@
             const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
             async function handleLogin(email, password) {
-                // Check local database first for demo users
-                const profiles = db.profiles.getAll();
+                // Fetch from Supabase directly
+                await db.initFromSupabase();
+                const profiles = await db.profiles.getAll();
                 const user = profiles.find(p => p.username === email || p.email === email);
 
                 // Demo fallback for default admin
@@ -205,7 +206,7 @@
                     role: role,
                     created_at: new Date().toISOString()
                 };
-                db.profiles.save(newProfile);
+                await db.profiles.save(newProfile);
 
                 // Supabase Attempt (Optional for demo)
                 try {

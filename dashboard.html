@@ -338,7 +338,8 @@
         let currentUser, currentProfile, salesChart;
 
         async function init() {
-            console.log("Initializing Dashboard (Local Mode)...");
+            console.log("Initializing Dashboard (Supabase Mode)...");
+            await db.initFromSupabase();
             try {
                 // Simulate session with localStorage for Local Mode
                 let sessionUser = JSON.parse(localStorage.getItem('electro_session'));

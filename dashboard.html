@@ -371,8 +371,8 @@
                 currentProfile = profiles.find(p => p.id === currentUser.id) || profiles[0];
 
                 // Update UI with user info
-                const displayName = currentProfile?.full_name || currentUser.email;
-                const role = currentProfile?.role || 'customer';
+                const displayName = currentProfile?.full_name || currentUser.full_name || currentUser.email;
+                const role = currentProfile?.role || currentUser.role || 'customer';
 
                 document.getElementById('user-display-name').innerText = displayName;
                 document.getElementById('role-text').innerText = `${role.toUpperCase()} ACCESS GRANTED`;
@@ -838,14 +838,17 @@
             openModal('paymentModal');
         }
 
-        document.getElementById('paymentForm').addEventListener('submit', (e) => {
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const method = document.getElementById('payment-method').options[document.getElementById('payment-method').selectedIndex].text;
-            db.orders.save({
+            
+            const custName = currentProfile?.full_name || currentUser?.full_name || currentUser?.email || 'Guest';
+
+            await db.orders.save({
                 total_amount: currentPaymentAmount,
                 method: method,
                 customer_id: currentUser.id,
-                customer_name: currentProfile.full_name,
+                customer_name: custName,
                 product_name: currentPaymentProduct
             });
             alert("Order placed successfully via " + method + "! Real-life transaction recorded securely.");

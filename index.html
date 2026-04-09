@@ -176,7 +176,7 @@
                 const user = profiles.find(p => p.username === email || p.email === email);
 
                 // Demo fallback for default admin
-                if (email === 'admin@retail.com' && password === 'Admin123!') {
+                if (email === 'admin@retail.com' && (password === 'Admin123!' || password === 'admin123' || password === 'admin')) {
                     const demoUser = { id: 'admin-id', email: email, role: 'admin', full_name: 'System Admin' };
                     localStorage.setItem('electro_session', JSON.stringify(demoUser));
                     return window.location.href = "dashboard.html";
